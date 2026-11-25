@@ -13,6 +13,7 @@ RUN a2enmod expires headers deflate >/dev/null \
 COPY theme/isvero-samorzad /usr/src/wordpress/wp-content/themes/isvero-samorzad
 COPY mu-plugins /usr/src/wordpress/wp-content/mu-plugins
 COPY init/seed.php /usr/local/share/isv/seed.php
+COPY init/aktualizacje.php /usr/local/share/isv/aktualizacje.php
 COPY init/isv-entrypoint.sh /usr/local/bin/isv-entrypoint.sh
 # Aktualizacja motywu przy każdym wdrożeniu (wolumen nie nadpisuje się sam).
 RUN printf '#!/bin/bash\nset -e\nif [ -d /var/www/html/wp-content/themes ]; then rm -rf /var/www/html/wp-content/themes/isvero-samorzad /var/www/html/wp-content/mu-plugins/isvero-demo-guard.php; mkdir -p /var/www/html/wp-content/mu-plugins; cp -r /usr/src/wordpress/wp-content/themes/isvero-samorzad /var/www/html/wp-content/themes/; cp /usr/src/wordpress/wp-content/mu-plugins/isvero-demo-guard.php /var/www/html/wp-content/mu-plugins/; chown -R www-data:www-data /var/www/html/wp-content; fi\nexec /usr/local/bin/isv-entrypoint.sh "$@"\n' > /usr/local/bin/isv-start.sh && chmod +x /usr/local/bin/isv-start.sh

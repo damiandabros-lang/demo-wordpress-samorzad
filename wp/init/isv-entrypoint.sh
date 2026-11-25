@@ -16,6 +16,7 @@ setup() {
   fi
   wp --allow-root theme activate isvero-samorzad
   wp --allow-root eval-file /usr/local/share/isv/seed.php
+  wp --allow-root eval-file /usr/local/share/isv/aktualizacje.php
   wp --allow-root rewrite structure '/%postname%/' --hard >/dev/null 2>&1 || true
   chown -R www-data:www-data wp-content
   echo "[isv] setup zakończony"
