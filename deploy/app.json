@@ -7,5 +7,5 @@
   "wordpress": true,
   "check_path": "/",
   "env": {"ISV_ALLOW_INDEX": "0", "WP_ADMIN_USER": "isvero_admin"},
-  "generate_secrets": ["DB_PASSWORD", "DB_ROOT_PASSWORD", "WP_ADMIN_PASSWORD"]
+  "generate_secrets": []
 }

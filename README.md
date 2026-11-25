@@ -35,15 +35,15 @@ deploy/                 # wdrożenie przez API Coolify (GitHub Actions)
 
 ## Uruchomienie lokalne
 ```bash
-DB_PASSWORD=$(openssl rand -hex 16) DB_ROOT_PASSWORD=$(openssl rand -hex 16) \
-WP_ADMIN_PASSWORD=$(openssl rand -hex 16) WP_SITE_URL=http://localhost:8080 \
+SERVICE_PASSWORD_DB=$(openssl rand -hex 16) SERVICE_PASSWORD_DBROOT=$(openssl rand -hex 16) \
+SERVICE_PASSWORD_WPADMIN=$(openssl rand -hex 16) WP_SITE_URL=http://localhost:8080 \
 docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
 ```
 
 ## Kopia zapasowa i odtworzenie
 Usługa `backup` raz na dobę zapisuje `db-RRRRMMDD-GGMM.sql.gz` i `wp-content-….tar.gz` w wolumenie `backups` (rotacja 14 dni). Odtworzenie:
 ```bash
-gunzip -c db-….sql.gz | docker compose exec -T db mariadb -u wordpress -p"$DB_PASSWORD" wordpress
+gunzip -c db-….sql.gz | docker compose exec -T db mariadb -u wordpress -p"$SERVICE_PASSWORD_DB" wordpress
 docker compose cp wp-content-….tar.gz wordpress:/tmp/ && docker compose exec wordpress tar xzf /tmp/wp-content-….tar.gz -C /var/www/html
 ```
 Kopia poza serwerem (np. OVH Object Storage przez backup S3 w Coolify) – do włączenia w panelu.

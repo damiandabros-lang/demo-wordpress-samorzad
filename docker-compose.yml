@@ -1,6 +1,6 @@
 # Isvero Studio – DEMO serwisu samorządowego (WordPress + MariaDB)
 # Osobna aplikacja Coolify (Docker Compose). Domenę przypisz TYLKO do usługi "wordpress" (port 80).
-# Sekrety ustaw w Coolify jako zmienne środowiskowe – nigdy w repozytorium.
+# Hasła: Coolify generuje je sam (zmienne SERVICE_PASSWORD_*); lokalnie ustaw je przed `docker compose up`.
 services:
   wordpress:
     build: ./wp
@@ -12,7 +12,7 @@ services:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:?ustaw DB_PASSWORD}
+      WORDPRESS_DB_PASSWORD: ${SERVICE_PASSWORD_DB}
       WORDPRESS_CONFIG_EXTRA: |
         define('DISALLOW_FILE_EDIT', true);
         define('WP_POST_REVISIONS', 10);
@@ -20,7 +20,7 @@ services:
         if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { $$_SERVER['HTTPS'] = 'on'; }
       WP_SITE_URL: ${WP_SITE_URL:-https://demo-samorzad.isverostudio.com}
       WP_ADMIN_USER: ${WP_ADMIN_USER:-isvero_admin}
-      WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:?ustaw WP_ADMIN_PASSWORD}
+      WP_ADMIN_PASSWORD: ${SERVICE_PASSWORD_WPADMIN}
       WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL:-admin@example.org}
       ISV_ALLOW_INDEX: ${ISV_ALLOW_INDEX:-0}
     volumes:
@@ -38,8 +38,8 @@ services:
     environment:
       MARIADB_DATABASE: wordpress
       MARIADB_USER: wordpress
-      MARIADB_PASSWORD: ${DB_PASSWORD:?ustaw DB_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?ustaw DB_ROOT_PASSWORD}
+      MARIADB_PASSWORD: ${SERVICE_PASSWORD_DB}
+      MARIADB_ROOT_PASSWORD: ${SERVICE_PASSWORD_DBROOT}
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -60,7 +60,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      MARIADB_PASSWORD: ${DB_PASSWORD:?ustaw DB_PASSWORD}
+      MARIADB_PASSWORD: ${SERVICE_PASSWORD_DB}
       KEEP_DAYS: "14"
     volumes:
       - wp_data:/wp:ro

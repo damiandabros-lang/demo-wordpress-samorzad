@@ -11,5 +11,5 @@ jobs:
       - run: bash -n wp/init/isv-entrypoint.sh
       - run: python3 -m py_compile deploy/coolify_deploy.py
       - run: docker compose -f docker-compose.yml config -q
-        env: { DB_PASSWORD: x, DB_ROOT_PASSWORD: x, WP_ADMIN_PASSWORD: x }
+        env: { SERVICE_PASSWORD_DB: x, SERVICE_PASSWORD_DBROOT: x, SERVICE_PASSWORD_WPADMIN: x }
       - run: docker build wp
