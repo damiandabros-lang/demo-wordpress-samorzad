@@ -148,13 +148,13 @@ add_shortcode('aktualnosci', function ($a) {
     $o = '<ul class="grid" role="list">';
     while ($q->have_posts()) {
         $q->the_post();
-        $o .= '<li class="card"><p class="meta"><time datetime="' . esc_attr(get_the_date('c')) . '">' . esc_html(get_the_date()) . '</time></p><h3><a href="' . esc_url(get_permalink()) . '">' . esc_html(get_the_title()) . '</a></h3><p>' . esc_html(wp_trim_words(get_the_excerpt(), 22)) . '</p></li>';
+        $o .= '<li class="card"><p class="meta"><time datetime="' . esc_attr(get_the_date('c')) . '">' . esc_html(get_the_date('j F Y')) . '</time></p><h3><a href="' . esc_url(get_permalink()) . '">' . esc_html(get_the_title()) . '</a></h3><p>' . esc_html(wp_trim_words(get_the_excerpt(), 22)) . '</p></li>';
     }
     wp_reset_postdata();
     return $o . '</ul>';
 });
 
-/** [dokumenty] – lista plików PDF z opisem formatu i rozmiaru. */
+/** [dokumenty] – równoważne wersje HTML i PDF z opisem formatu i rozmiaru. */
 add_shortcode('dokumenty', function ($a) {
     $a = shortcode_atts(['zestaw' => 'bip'], $a);
     $docs = [
@@ -176,7 +176,8 @@ add_shortcode('dokumenty', function ($a) {
     $o = '<ul class="doc-list">';
     foreach ($docs as [$f, $t]) {
         $size = is_file($dir . $f) ? size_format(filesize($dir . $f), 1) : '';
-        $o .= '<li>' . isv_icon('doc') . '<span><a href="' . esc_url($url . $f) . '" download>' . esc_html($t) . '</a> <span class="meta">(PDF, ' . esc_html($size) . ')</span></span></li>';
+        $html = str_replace('.pdf', '.html', $f);
+        $o .= '<li>' . isv_icon('doc') . '<span><a href="' . esc_url($url . $html) . '">' . esc_html($t) . ' — czytaj HTML</a><br><a href="' . esc_url($url . $f) . '" download>Pobierz PDF<span class="sr-only">: ' . esc_html($t) . '</span></a> <span class="meta">(' . esc_html($size) . ')</span></span></li>';
     }
     return $o . '</ul>';
 });
