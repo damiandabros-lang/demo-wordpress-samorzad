@@ -1,0 +1,15 @@
+name: ci
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: for f in $(find wp -name '*.php'); do php -l "$f" || exit 1; done
+      - run: bash -n wp/init/isv-entrypoint.sh
+      - run: python3 -m py_compile deploy/coolify_deploy.py
+      - run: docker compose -f compose.yaml config -q
+        env: { DB_PASSWORD: x, DB_ROOT_PASSWORD: x, WP_ADMIN_PASSWORD: x }
+      - run: docker build wp

@@ -1,0 +1,90 @@
+# Isvero Studio – DEMO serwisu samorządowego (WordPress + MariaDB)
+# Osobna aplikacja Coolify (Docker Compose). Domenę przypisz TYLKO do usługi "wordpress" (port 80).
+# Sekrety ustaw w Coolify jako zmienne środowiskowe – nigdy w repozytorium.
+services:
+  wordpress:
+    build: ./wp
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:?ustaw DB_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('DISALLOW_FILE_EDIT', true);
+        define('WP_POST_REVISIONS', 10);
+        define('WP_AUTO_UPDATE_CORE', 'minor');
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { $$_SERVER['HTTPS'] = 'on'; }
+      WP_SITE_URL: ${WP_SITE_URL:-https://demo-samorzad.isverostudio.com}
+      WP_ADMIN_USER: ${WP_ADMIN_USER:-isvero_admin}
+      WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:?ustaw WP_ADMIN_PASSWORD}
+      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL:-admin@example.org}
+      ISV_ALLOW_INDEX: ${ISV_ALLOW_INDEX:-0}
+    volumes:
+      - wp_data:/var/www/html
+    expose:
+      - "80"
+    deploy:
+      resources:
+        limits: { memory: 512M, cpus: "1.0" }
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: ${DB_PASSWORD:?ustaw DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?ustaw DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits: { memory: 512M, cpus: "1.0" }
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  # Codzienna kopia: zrzut bazy + wp-content w wolumenie "backups", przechowywane 14 dni.
+  backup:
+    image: mariadb:11.4
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MARIADB_PASSWORD: ${DB_PASSWORD:?ustaw DB_PASSWORD}
+      KEEP_DAYS: "14"
+    volumes:
+      - wp_data:/wp:ro
+      - backups:/backups
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        while true; do
+          ts=$$(date +%Y%m%d-%H%M)
+          if mariadb-dump -h db -u wordpress -p"$$MARIADB_PASSWORD" --single-transaction --routines wordpress | gzip > "/backups/db-$$ts.sql.gz" \
+             && tar czf "/backups/wp-content-$$ts.tar.gz" -C /wp wp-content; then
+            echo "[backup] OK $$ts"
+          else
+            echo "[backup] BLAD $$ts"
+          fi
+          find /backups -type f -name '*.gz' -mtime "+$${KEEP_DAYS:-14}" -delete
+          sleep 86400
+        done
+    deploy:
+      resources:
+        limits: { memory: 128M, cpus: "0.25" }
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+volumes:
+  wp_data:
+  db_data:
+  backups:

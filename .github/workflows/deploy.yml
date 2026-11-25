@@ -1,0 +1,32 @@
+name: deploy-demo
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: deploy-demo
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sprawdź sekret
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          if [ -z "$COOLIFY_TOKEN" ]; then echo "::warning::Brak sekretu COOLIFY_TOKEN – pomijam wdrożenie"; echo "SKIP=1" >> "$GITHUB_ENV"; fi
+      - name: Wdróż do Coolify (osobna aplikacja)
+        if: env.SKIP != '1'
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: python3 deploy/coolify_deploy.py
+      - uses: actions/upload-artifact@v4
+        if: always() && env.SKIP != '1'
+        with:
+          name: deploy-report
+          path: deploy-report.json
+          if-no-files-found: ignore
