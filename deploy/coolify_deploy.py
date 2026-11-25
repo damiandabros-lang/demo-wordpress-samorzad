@@ -73,7 +73,7 @@ if CFG.get('wordpress'):
     envs.setdefault('WP_SITE_URL', domain)
 for key in CFG.get('generate_secrets', []):
     if key not in existing:
-        envs[key] = secrets.token_urlsafe(32)
+        envs[key] = 'Aa1-' + secrets.token_urlsafe(32)  # spełnia wymagania złożoności MS SQL
 for k, v in envs.items():
     if k in existing and k in CFG.get('generate_secrets', []):
         continue
