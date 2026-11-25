@@ -10,6 +10,6 @@ jobs:
       - run: for f in $(find wp -name '*.php'); do php -l "$f" || exit 1; done
       - run: bash -n wp/init/isv-entrypoint.sh
       - run: python3 -m py_compile deploy/coolify_deploy.py
-      - run: docker compose -f compose.yaml config -q
+      - run: docker compose -f docker-compose.yml config -q
         env: { DB_PASSWORD: x, DB_ROOT_PASSWORD: x, WP_ADMIN_PASSWORD: x }
       - run: docker build wp

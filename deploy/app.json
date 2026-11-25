@@ -3,7 +3,7 @@
   "subdomain": "demo-samorzad",
   "web_service": "wordpress",
   "port": 80,
-  "compose": "/compose.yaml",
+  "compose": "/docker-compose.yml",
   "wordpress": true,
   "check_path": "/",
   "env": {"ISV_ALLOW_INDEX": "0", "WP_ADMIN_USER": "isvero_admin"},

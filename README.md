@@ -25,7 +25,7 @@ Testy automatyczne nie zastępują pełnego audytu z udziałem użytkowników �
 WordPress (oficjalny obraz `wordpress:php8.3-apache`), PHP 8.3, MariaDB 11.4, lekki autorski motyw klasyczny (bez page builderów i jQuery na froncie), mu-plugin z zabezpieczeniami (noindex, brak XML-RPC, brak enumeracji użytkowników, brak wysyłki e-maili, nagłówki bezpieczeństwa), WP-CLI do jednorazowego załadowania treści demo, Docker Compose pod Coolify, codzienna kopia bazy i `wp-content` (14 dni).
 
 ```
-compose.yaml            # wordpress + db + backup
+docker-compose.yml            # wordpress + db + backup
 wp/Dockerfile           # obraz WordPress z motywem, mu-pluginem i WP-CLI
 wp/theme/isvero-samorzad
 wp/mu-plugins/isvero-demo-guard.php
@@ -37,7 +37,7 @@ deploy/                 # wdrożenie przez API Coolify (GitHub Actions)
 ```bash
 DB_PASSWORD=$(openssl rand -hex 16) DB_ROOT_PASSWORD=$(openssl rand -hex 16) \
 WP_ADMIN_PASSWORD=$(openssl rand -hex 16) WP_SITE_URL=http://localhost:8080 \
-docker compose -f compose.yaml -f compose.local.yaml up --build
+docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
 ```
 
 ## Kopia zapasowa i odtworzenie
