@@ -3,7 +3,7 @@
 > **To jest projekt pokazowy (portfolio) Isvero Studio, przygotowany w listopadzie 2026 r.**
 > Nie jest to strona żadnej instytucji publicznej ani realizacja dla klienta. „Gmina Przykładowo”, osoby, dokumenty i dane są fikcyjne.
 
-**Demo na żywo:** https://demo-samorzad.148.113.245.121.sslip.io (noindex – nieindeksowane do czasu akceptacji)
+**Demo na żywo:** https://demo-samorzad.isverostudio.com (noindex – nieindeksowane do czasu akceptacji)
 
 ## Co pokazuje
 - **Serwis gminy**: strona główna z kafelkami „Załatw sprawę”, aktualności i ogłoszenia, podatki i opłaty, harmonogram odbioru odpadów, kalendarz wydarzeń, kontakt z formularzem (w demo nic nie wysyła).

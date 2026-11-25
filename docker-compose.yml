@@ -17,6 +17,8 @@ services:
         define('DISALLOW_FILE_EDIT', true);
         define('WP_POST_REVISIONS', 10);
         define('WP_AUTO_UPDATE_CORE', 'minor');
+        define('WP_HOME', getenv('WP_SITE_URL') ?: 'https://demo-samorzad.isverostudio.com');
+        define('WP_SITEURL', getenv('WP_SITE_URL') ?: 'https://demo-samorzad.isverostudio.com');
         if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { $$_SERVER['HTTPS'] = 'on'; }
       WP_SITE_URL: ${WP_SITE_URL:-https://demo-samorzad.isverostudio.com}
       WP_ADMIN_USER: ${WP_ADMIN_USER:-isvero_admin}
