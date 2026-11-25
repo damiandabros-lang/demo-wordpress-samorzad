@@ -6,6 +6,12 @@ defined('ABSPATH') || exit;
 
 const ISV_VER = '1.0.0';
 
+/* Opis demonstracyjny pozostaje w banerze, zamiast wydłużać tytuł karty. */
+add_filter('document_title_parts', function ($parts) {
+    if (is_front_page()) unset($parts['tagline']);
+    return $parts;
+});
+
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
@@ -194,12 +200,29 @@ add_shortcode('rejestr_zmian', function () {
 /** [formularz_kontaktowy] – w DEMO nic nie wysyła i nic nie zapisuje. */
 add_shortcode('formularz_kontaktowy', function () {
     $sent = isset($_POST['isv_demo_form']);
-    $o = '';
+    $errors = [];
+    $values = [];
+    foreach (['f_name', 'f_email', 'f_msg', 'f_rodo', 'f_topic'] as $field) {
+        $values[$field] = isset($_POST[$field]) && is_string($_POST[$field]) ? trim(wp_unslash($_POST[$field])) : '';
+    }
     if ($sent) {
+        if ($values['f_name'] === '') $errors['f-name'] = 'Podaj imię i nazwisko.';
+        if (!is_email($values['f_email'])) $errors['f-email'] = 'Podaj poprawny adres e-mail.';
+        if ($values['f_msg'] === '') $errors['f-msg'] = 'Wpisz wiadomość.';
+        if ($values['f_rodo'] !== 'on') $errors['f-rodo'] = 'Potwierdź zapoznanie się z informacją o przetwarzaniu danych.';
+    }
+    $o = '';
+    if ($errors) {
+        $o .= '<div class="notice" role="alert" tabindex="-1" id="form-status"><h2>Popraw dane formularza</h2><ul>';
+        foreach ($errors as $id => $message) {
+            $o .= '<li id="' . esc_attr($id) . '-err"><a href="#' . esc_attr($id) . '">' . esc_html($message) . '</a></li>';
+        }
+        $o .= '</ul></div>';
+    } elseif ($sent) {
         $o .= '<div class="notice notice-ok" role="status" tabindex="-1" id="form-status"><p><strong>To jest wersja demonstracyjna.</strong> Formularz działa poprawnie, ale nie wysyła ani nie zapisuje żadnych danych.</p></div>';
     }
     $o .= '<form method="post" action="#form-status" novalidate>
-<p class="hint">Pola oznaczone gwiazdką (*) są wymagane.</p>
+<p class="hint">Pola oznaczone gwiazdką (*) są wymagane. Wpisuj wyłącznie fikcyjne dane.</p>
 <div class="form-row"><label for="f-name">Imię i nazwisko *</label><input id="f-name" name="f_name" type="text" autocomplete="name" required aria-required="true"></div>
 <div class="form-row"><label for="f-email">Adres e-mail *</label><input id="f-email" name="f_email" type="email" autocomplete="email" required aria-required="true" aria-describedby="f-email-hint"><p class="hint" id="f-email-hint">Na ten adres wyślemy odpowiedź (w demo – nie wysyłamy).</p></div>
 <div class="form-row"><label for="f-topic">Temat</label><select id="f-topic" name="f_topic"><option>Sprawy ogólne</option><option>Podatki i opłaty</option><option>Odpady</option><option>Dostępność</option></select></div>
@@ -208,6 +231,18 @@ add_shortcode('formularz_kontaktowy', function () {
 <input type="hidden" name="isv_demo_form" value="1">
 <button class="btn" type="submit">Wyślij wiadomość</button>
 </form>';
+    if ($errors) {
+        foreach ($errors as $id => $message) {
+            $o = str_replace('id="' . $id . '"', 'id="' . $id . '" aria-invalid="true" aria-errormessage="' . $id . '-err"', $o);
+        }
+        $o = str_replace('name="f_name"', 'name="f_name" value="' . esc_attr($values['f_name']) . '"', $o);
+        $o = str_replace('name="f_email"', 'name="f_email" value="' . esc_attr($values['f_email']) . '"', $o);
+        $o = str_replace('aria-required="true"></textarea>', 'aria-required="true">' . esc_textarea($values['f_msg']) . '</textarea>', $o);
+        if ($values['f_rodo'] === 'on') $o = str_replace('name="f_rodo"', 'name="f_rodo" checked', $o);
+        foreach (['Sprawy ogólne', 'Podatki i opłaty', 'Odpady', 'Dostępność'] as $topic) {
+            if ($values['f_topic'] === $topic) $o = str_replace('<option>' . $topic . '</option>', '<option selected>' . $topic . '</option>', $o);
+        }
+    }
     return $o;
 });
 
